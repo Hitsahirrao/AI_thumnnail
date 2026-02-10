@@ -46,7 +46,7 @@ export default function Navbar() {
                     <Link to='/my-generation' className="hover:text-slate-300 transition">
                         My Generations
                     </Link>
-                    <Link to='#' className="hover:text-slate-300 transition">
+                    <Link to='/#contact' className="hover:text-slate-300 transition">
                         Contact
                     </Link>
                 </div>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import type { IThumbnail } from "../assets/assets";
+import Footer from "../components/footer";
 import {
   AspectRatio,
   colorSchemes,
@@ -138,6 +139,9 @@ const Generate = () => {
                 />
             </div>
             </div>
+
+            {/**Footer */}
+            <Footer/>
         </main>
       </div>
     </>

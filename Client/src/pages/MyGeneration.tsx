@@ -3,6 +3,8 @@ import { useNavigate,Link } from "react-router-dom";
 import SoftBackDrop from "../components/SoftBackDrop";
 import { dummyThumbnails, type IThumbnail } from "../assets/assets";
 import { ArrowUpRightIcon, DownloadIcon, TrashIcon } from "lucide-react";
+import Footer from "../components/footer";
+
 
 const MyGeneration = () => {
   const navigate = useNavigate();
@@ -136,6 +138,8 @@ const MyGeneration = () => {
           </div>
         )}
       </div>
+      {/**Footer */}
+      <Footer/>
     </>
   );
 };
