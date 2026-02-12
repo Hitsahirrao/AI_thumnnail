@@ -25,7 +25,7 @@ export const registerUser = async (req:Request, res: Response)=>{
 
         //setting userdata in session
         req.session.isLoggedIn = true;
-        req.session.userId = newUser._id;
+        req.session.userId = newUser._id.to_string();
 
         return res.json({
             message:'Account Created Successfully',
@@ -48,7 +48,7 @@ export const loginUser = async (req:Request, res: Response)=>{
 
         //find user by email
         const user = await User.findOne({email});
-        if(user){
+        if(!user){
             return res.status(400).json({message: 'Invalid email or password'})
         }
 
