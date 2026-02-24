@@ -1,6 +1,8 @@
-{
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://thumblify-server-sage.vercel.app/api/$1" },
-    { "source": "/(.*)", "destination": "/" }
-  ]
-}
+  {
+    "rewrites": [
+      {
+        "source": "/(.*)",
+        "destination": "/"
+      }
+    ]
+  }
