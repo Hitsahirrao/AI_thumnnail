@@ -4,10 +4,14 @@ import SoftBackDrop from "../components/SoftBackDrop";
 import { dummyThumbnails, type IThumbnail } from "../assets/assets";
 import { ArrowUpRightIcon, DownloadIcon, TrashIcon } from "lucide-react";
 import Footer from "../components/footer";
+import { toast } from "react-hot-toast";
+import api from "../configs/api";
+import { useAuth } from "../context/AuthContext";
 
 
 const MyGeneration = () => {
   const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
 
   const aspectRatioClassMap: Record<string, string> = {
     "16:9": "aspect-video",
@@ -29,15 +33,30 @@ const MyGeneration = () => {
 
   // Keeping these for later UI buttons
   const handleDownload = (image_url: string) => {
-    window.open(image_url, "_blank");
+    const link = document.createElement('a')
+    link.href = image_url.replace('/upload','/upload/fl_attachment')
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
   };
 
   const handleDelete = async (id: string) => {
-    console.log("delete", id);
+    try {
+      const confirm  = window.confirm('Are you sure you want to delete this message?')
+      if(!confirm) return 
+      const {data} = await api.delete(`/api/thumbnail/detail/${id}`);
+      toast.success(data.message);
+      setThumbnails(thumbnails.filter((t) => t._id !== id));
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error?.response?.data?.message || error.message || "Delete failed");
+    }
   };
 
   useEffect(() => {
-    fetchThumbnails();
+    if(isLoggedIn){
+      fetchThumbnails();
+    } 
   }, []);
 
   return (

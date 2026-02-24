@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import type { IThumbnail } from "../assets/assets";
 import Footer from "../components/footer";
 import {
@@ -13,9 +13,15 @@ import AspectRatioSelector from "../components/AspectRatioSelector";
 import StyleSelector from "../components/StyleSelector";
 import ColorSchemeSelector from "../components/ColorSchemeSelector";
 import PreviewPanel from "../components/PreviewPanel";
+import {toast} from "react-hot-toast";
+import api from "../configs/api"; 
+import {useAuth} from "../context/AuthContext";
 
 const Generate = () => {
   const { id } = useParams<{ id: string }>();
+  const {pathname} = useLocation();
+  const navigate = useNavigate();
+  const {isLoggedIn} = useAuth();
 
   const [title, setTitle] = useState("");
   const [additionalDetails, setAdditionalDetails] = useState("");
@@ -28,21 +34,79 @@ const Generate = () => {
 
   const [colorSchemeId, setColorSchemeId] = useState<string>(colorSchemes[0].id);
 
-  const handleGenerate = async ()=> {
+  const handleGenerate = async () => {
+  if (!isLoggedIn) return toast.error("Please login to generate a thumbnail");
+  if (!title.trim()) return toast.error("Please enter a title or topic for the thumbnail");
 
+  setLoading(true);
+
+  const api_payload = {
+    title,
+    prompt: additionalDetails,
+    style,
+    aspect_ratio: aspectRatio,
+    color_scheme: colorSchemeId,
+    text_overlay: true,
+  };
+
+  try {
+    const { data } = await api.post("/api/thumbnail/generate", api_payload);
+
+    if (data?.thumbnail?._id) {
+      toast.success(data.message || "Thumbnail created");
+      navigate("/generate/" + data.thumbnail._id);
+    } else {
+      toast.error(data?.message || "Something went wrong");
+      setLoading(false);
+    }
+  } catch (error: any) {
+    console.log(error);
+    toast.error(error?.response?.data?.message || error.message || "An error occurred");
+    setLoading(false);
   }
+};
   const fetchThumbnail = async ()=> {
-    if(id){
-        const thumbnail : any = dummyThumbnails.find((thumbnail)=> thumbnail._id === id);
-        setThumbnail(thumbnail)
-        setAdditionalDetails(thumbnail.user_prompt)
-        setTitle(thumbnail.title)
-        setColorSchemeId(thumbnail.color_scheme)
-        setAspectRatio(thumbnail.aspect_ratio)
-        setStyle(thumbnail.style)
-        setLoading(false)
+    try {
+      const {data} = await api.get(`/api/user/thumbnail/${id}`);
+      const t = data?.thumbnail as IThumbnail | undefined;
+
+      if(!t){
+        setThumbnail(null);
+        setLoading(false);
+        return;
+      }
+
+      setThumbnail(t);
+      setLoading(!t.image_url);
+      setAdditionalDetails(t.user_prompt || "")
+      setTitle((t as any).title || "")
+      setAspectRatio((t as any).aspect_ratio || "16:9")
+      setStyle((t as any).style || "Bold & Graphic")
+      setColorSchemeId((t as any).color_scheme || colorSchemes[0].id)
+    } catch (error: any) {
+      console.log(error);
+      toast.error(error?.response?.data?.message || error.message || "An error occurred");
+      setLoading(false);
     }
   }
+
+  useEffect(()=>{
+    if(isLoggedIn && id){
+      fetchThumbnail()
+    }
+    if(id && loading && isLoggedIn){
+      const interval = setInterval(()=>{
+        fetchThumbnail()
+      },5000);
+      return ()=> clearInterval(interval)
+    }
+  },[id,loading, isLoggedIn])
+
+  useEffect(()=>{
+    if(!id && thumbnail){
+      setThumbnail(null)
+    }
+  },[pathname])
 
   return (
     <>
