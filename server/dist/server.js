@@ -1,32 +1,63 @@
-import express from 'express';
-import cors from 'cors';
-import 'dotenv/config';
-import connectDB from './configs/db.js';
-import session from 'express-session';
-import MongoStore from 'connect-mongo';
-import AuthRouter from './routes/AuthRouthes.js';
-await connectDB();
+import express from "express";
+import cors from "cors";
+import "dotenv/config";
+import session from "express-session";
+import MongoStore from "connect-mongo";
+
+import connectDB from "./configs/db.js";
+import AuthRouter from "./routes/AuthRouthes.js";
+
 const app = express();
-app.use(session({
-    secret: process.env.SESSION_SECRET,
+
+// ✅ CORS: include your Vercel frontend domain too
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:3000",
+      "https://ai-thumbnail-navy.vercel.app"
+    ],
+    credentials: true,
+  })
+);
+
+app.use(express.json());
+
+// ✅ sessions
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET!,
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 }, // 7 days validity
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+      sameSite: "none",  // ✅ needed for cross-site cookies on Vercel
+      secure: true       // ✅ required when sameSite is none
+    },
     store: MongoStore.create({
-        mongoUrl: process.env.MONGODB_URI,
-        collectionName: 'sessions'
-    })
-}));
-app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:3000'],
-    credentials: true
-}));
-app.use(express.json());
-app.get('/', (req, res) => {
-    res.send('Server is Live!');
+      mongoUrl: process.env.MONGODB_URI,
+      collectionName: "sessions",
+    }),
+  })
+);
+
+// ✅ connect DB once (cache)
+let dbReady = false;
+async function ensureDB() {
+  if (!dbReady) {
+    await connectDB();
+    dbReady = true;
+  }
+}
+
+app.get("/", async (req, res) => {
+  await ensureDB();
+  res.send("Server is Live!");
 });
-app.use('/api/auth', AuthRouter);
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-    console.log(`Server is running at http://localhost:${port}`);
-});
+
+app.use("/api/auth", async (req, res, next) => {
+  await ensureDB();
+  next();
+}, AuthRouter);
+
+export default app;
