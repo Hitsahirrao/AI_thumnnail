@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import type { IThumbnail } from "../assets/assets";
-import Footer from "../components/footer";
+import Footer from "../components/Footer";
 import {
   AspectRatio,
   colorSchemes,

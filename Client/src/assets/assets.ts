@@ -7,10 +7,10 @@ import thumb_6 from "./thumb_6.jpg";
 import thumb_7 from "./thumb_7.jpg";
 
 
-export const aspectRatios = ["16:9", "1:1", "9:16"];
+export const aspectRatios = ["16:9", "1:1", "9:16"] as const;
 export type AspectRatio = (typeof aspectRatios)[number];
 
-export const thumbnailStyles = ["Bold & Graphic", "Minimalist", "Photorealistic", "Illustrated", "Tech/Futuristic"];
+export const thumbnailStyles = ["Bold & Graphic", "Minimalist", "Photorealistic", "Illustrated", "Tech/Futuristic"] as const;
 export type ThumbnailStyle = (typeof thumbnailStyles)[number];
 
 export const colorSchemes = [
@@ -38,16 +38,16 @@ export interface IThumbnail {
     userId: string;
     title: string;
     description?: string;
-    style: "Bold & Graphic" | "Tech/Futuristic" | "Minimalist" | "Photorealistic" | "Illustrated";
-    aspect_ratio?: "16:9" | "1:1" | "9:16";
-    color_scheme?: "vibrant" | "sunset" | "forest" | "neon" | "purple" | "monochrome" | "ocean" | "pastel";
+    style: ThumbnailStyle;
+    aspect_ratio?: AspectRatio;
+    color_scheme?: ColorScheme["id"];
     text_overlay?: boolean;
     image_url?: string;
     prompt_used?: string;
     user_prompt?: string;
     isGenerating?: boolean;
-    createdAt?: Date;
-    updatedAt?: Date;
+    createdAt?: string | Date;
+    updatedAt?: string | Date;
 }
 
 export interface IUser {

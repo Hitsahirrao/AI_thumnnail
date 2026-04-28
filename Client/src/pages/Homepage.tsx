@@ -3,13 +3,13 @@ import React from "react";
 // Adjust import paths if your folder names differ
 import HeroSection from "../sections/hero-section";
 import TrustedCompanies from "../sections/trusted-companies";
-import OurLatestCreation from "../sections/our-latest-creation";
+import OurLatestCreation from "../sections/our-latest-creation.tsx";
 import AboutOurApps from "../sections/about-our-apps";
 import OurTestimonials from "../sections/our-testimonials";
-import PricingSection from "../sections/PricingSection";
+import PricingSection from "../sections/pricing-section";
 import GetInTouch from "../sections/get-in-touch";
 import SubscribeNewsletter from "../sections/subscribe-newsletter";
-import Footer from "../components/footer";
+import Footer from "../components/Footer";
 
 const Homepage = () => {
   return (

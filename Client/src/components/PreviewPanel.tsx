@@ -1,5 +1,11 @@
 import { DownloadIcon, ImageIcon, Loader2Icon } from "lucide-react";
-import { AspectRatio, IThumbnail } from "../assets/assets";
+import type { AspectRatio, IThumbnail } from "../assets/assets";
+
+const aspectClasses: Record<AspectRatio, string> = {
+  "16:9": "aspect-video",
+  "1:1": "aspect-square",
+  "9:16": "aspect-[9/16]",
+};
 
 const PreviewPanel = ({
   thumbnail,
@@ -10,27 +16,20 @@ const PreviewPanel = ({
   isLoading: boolean;
   aspectRatio: AspectRatio;
 }) => {
-  const aspectClasses: Record<AspectRatio, string> = {
-    "16:9": "aspect-video",
-    "1:1": "aspect-square",
-    "9:16": "aspect-[9/16]",
-  };
-
   const onDownload = () => {
     if (!thumbnail?.image_url) return;
-    const link = document.createElement('a');
-    link.href = thumbnail?.image_url.replace('/uplaod','/upload/fl_attachment')
+
+    const link = document.createElement("a");
+    link.href = thumbnail.image_url.replace("/upload", "/upload/fl_attachment");
+    link.download = thumbnail.title || "thumbnail";
     document.body.appendChild(link);
-    link.click()
-    link.remove()
+    link.click();
+    link.remove();
   };
 
   return (
     <div className="relative mx-auto w-full max-w-2xl">
-      <div
-        className={`relative overflow-hidden ${aspectClasses[aspectRatio]}`}
-      >
-        {/* Loading state */}
+      <div className={`relative overflow-hidden ${aspectClasses[aspectRatio]}`}>
         {isLoading && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/40">
             <Loader2Icon className="size-8 animate-spin text-zinc-400" />
@@ -45,12 +44,11 @@ const PreviewPanel = ({
           </div>
         )}
 
-        {/* Image preview */}
         {!isLoading && thumbnail?.image_url && (
           <div className="group relative h-full w-full">
             <img
               src={thumbnail.image_url}
-              alt={thumbnail.title}
+              alt={thumbnail.title || "Generated thumbnail"}
               className="h-full w-full object-cover"
             />
 
@@ -67,7 +65,6 @@ const PreviewPanel = ({
           </div>
         )}
 
-        {/* Empty state */}
         {!isLoading && !thumbnail?.image_url && (
           <div className="absolute inset-0 m-2 flex flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed border-white/20 bg-black/25">
             <div className="hidden sm:flex size-20 items-center justify-center rounded-full bg-white/10">
