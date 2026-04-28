@@ -30,25 +30,12 @@ const MyGeneration = () => {
   const [thumbnails, setThumbnails] = useState<IThumbnail[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchThumbnails = async () => {
-    setLoading(true);
-    try {
-      const { data } = await api.get("/api/user/thumbnails");
-      const list = data?.thumbnails ?? data?.data ?? [];
-      setThumbnails(Array.isArray(list) ? list : []);
-    } catch (error: any) {
-      console.error(error);
-      toast.error(error?.response?.data?.message || error.message || "Failed to load thumbnails");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleDownload = (imageUrl?: string) => {
     if (!imageUrl) return toast.error("Image is not ready yet");
 
     const link = document.createElement("a");
     link.href = imageUrl.replace("/upload", "/upload/fl_attachment");
+    link.download = "thumbnail";
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -69,11 +56,26 @@ const MyGeneration = () => {
   };
 
   useEffect(() => {
-    if (isLoggedIn) {
-      fetchThumbnails();
-    } else {
+    if (!isLoggedIn) {
       setThumbnails([]);
+      return;
     }
+
+    const fetchThumbnails = async () => {
+      setLoading(true);
+      try {
+        const { data } = await api.get("/api/user/thumbnails");
+        const list = data?.thumbnails ?? data?.data ?? [];
+        setThumbnails(Array.isArray(list) ? list : []);
+      } catch (error: any) {
+        console.error(error);
+        toast.error(error?.response?.data?.message || error.message || "Failed to load thumbnails");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchThumbnails();
   }, [isLoggedIn]);
 
   return (
@@ -110,7 +112,7 @@ const MyGeneration = () => {
         {!loading && thumbnails.length > 0 && (
           <div className="columns-1 gap-8 sm:columns-2 lg:columns-3 2xl:columns-4">
             {thumbnails.map((thumb) => {
-              const aspectClass = aspectRatioClassMap[thumb.aspect_ratio ?? "16:9"];
+              const aspectClass = aspectRatioClassMap[thumb.aspect_ratio ?? "16:9"] ?? "aspect-video";
 
               return (
                 <div
@@ -169,7 +171,7 @@ const MyGeneration = () => {
                     </button>
 
                     {thumb.image_url && (
-                      <Link target="_blank" to={getPreviewUrl(thumb)}>
+                      <Link target="_blank" rel="noopener noreferrer" to={getPreviewUrl(thumb)}>
                         <ArrowUpRightIcon className="size-6 bg-black/50 p-1 rounded hover:bg-indigo-600 transition-all" />
                       </Link>
                     )}
